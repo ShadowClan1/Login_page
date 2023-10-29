@@ -9,13 +9,35 @@ import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
-import { Link } from 'react-router-dom';
-
-
+import { Link, useNavigate } from 'react-router-dom';
+import { useFormik } from 'formik';
+import * as Yup from 'yup'
+import {getUser, setUser} from '../../localstorage/localStorage'
 const LoginForm = () => {
-const handleSubmit = () => {
-    
+  const navigate = useNavigate()
+const handleSubmit = e => {
+  e.preventDefault()
+    form.handleSubmit()
 }
+const initialValues = {
+  email : "",
+  password : "",
+  rememberMe : false
+}
+const form = useFormik({
+  initialValues,
+  validationSchema : Yup.object({
+    email : Yup.string().email(). required(),
+    password : Yup.string().required()
+  }),
+  onSubmit : ()=>{
+    console.log(form.values)
+    setUser({...form.values, plan : false})
+    console.log(getUser())
+    navigate("/dashboard")
+
+  } 
+})
 
   return (
     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square sx={{
@@ -36,7 +58,7 @@ const handleSubmit = () => {
       <Typography component="h1" variant="h5">
         Sign in
       </Typography>
-      <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
+      <Box component="form" noValidate  sx={{ mt: 1 }}>
         <TextField
           margin="normal"
           required
@@ -46,6 +68,10 @@ const handleSubmit = () => {
           name="email"
           autoComplete="email"
           autoFocus
+          onChange={form.handleChange}
+          value={form.values.email}
+          error={ form.touched.email &&  Boolean(form.errors.email) }
+          helperText = {form.touched.email && form.errors.email}
         />
         <TextField
           margin="normal"
@@ -55,10 +81,14 @@ const handleSubmit = () => {
           label="Password"
           type="password"
           id="password"
+          onChange={form.handleChange}
+          value={form.values.password}
+          error={ form.touched.password &&  Boolean(form.errors.password) }
+          helperText = {form.touched.password && form.errors.password}
           autoComplete="current-password"
         />
         <FormControlLabel
-          control={<Checkbox value="remember" color="primary" />}
+          control={<Checkbox  color="primary"  name="rememberMe" value={form.values.rememberMe} onChange={form.handleChange} />}
           label="Remember me"
         />
         <Button
@@ -66,6 +96,7 @@ const handleSubmit = () => {
           fullWidth
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
+          onClick={handleSubmit}
         >
           Sign In
         </Button>

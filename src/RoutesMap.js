@@ -2,12 +2,14 @@ import { Navigate } from "react-router-dom";
 import { getUser } from "./localstorage/localStorage";
 import LoginPage from "./pages/login/LoginPage";
 import SignUpPage from "./pages/signup/SignUpPage";
+import Dashboard from "./pages/dashboard/DashBoard";
 
-const user = getUser();
-const routes =[
+
+const getRoutes = user => {
+    const routes =[
     {
-        path : 'dashboard',
-        element : user ? <div>user logged in</div> : <Navigate to='/login'/>,
+        path : '/dashboard',
+        element : user ? <Dashboard/> : <Navigate to='/login'/>,
         children : []
     },
     {
@@ -16,11 +18,11 @@ const routes =[
     },
     {
         path : 'login',
-        element : !user ? <LoginPage />  : <Navigate to='dashboard'/> 
+        element : !user ? <LoginPage />  : <Navigate to='/dashboard'/> 
     },
     {
         path : 'signup',
-        element : !user ? <SignUpPage />  : <Navigate to='dashboard'/> 
+        element : !user ? <SignUpPage />  : <Navigate to='/dashboard'/> 
     }
     ,
     
@@ -29,9 +31,13 @@ const routes =[
         element : <div>Page Not found</div>
     }
     ,
-    {
-        path : '*',
-        element : <Navigate to='/404' replace/>
-    }
+    // {
+    //     path : '*',
+    //     element : <Navigate to='/404' replace/>
+    // }
 ]
-export default routes;
+
+
+return routes
+}
+export default getRoutes;
