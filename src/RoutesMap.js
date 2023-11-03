@@ -1,43 +1,42 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useRoutes } from "react-router-dom";
 import { getUser } from "./localstorage/localStorage";
 import LoginPage from "./pages/login/LoginPage";
 import SignUpPage from "./pages/signup/SignUpPage";
-import Dashboard from "./pages/dashboard/DashBoard";
+import DashboardLayout from "./pages/dashboard/DashBoardLayout";
+import DashBoard from "./pages/dashboard/DashBoard";
 
-
-const getRoutes = user => {
-    const routes =[
+const Routes = (user) => {
+  const routes = useRoutes([
     {
-        path : '/dashboard',
-        element : user ? <Dashboard/> : <Navigate to='/login'/>,
-        children : []
-    },
-    {
-        path : '',
-        element : user ? <Navigate to='/dashboard' /> : <Navigate to='/login' />
-    },
-    {
-        path : 'login',
-        element : !user ? <LoginPage />  : <Navigate to='/dashboard'/> 
-    },
-    {
-        path : 'signup',
-        element : !user ? <SignUpPage />  : <Navigate to='/dashboard'/> 
-    }
-    ,
+      path: "/dashboard",
+      element: user ? <DashboardLayout /> : <Navigate to="/login" />,
+      children: [{ element : <DashBoard/>, index : true },
+    {path : 'file-manager' , element :<> Customers </>}
     
+    ],
+    },
     {
-        path : '404',
-        element : <div>Page Not found</div>
-    }
-    ,
+      path: "",
+      element: user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />,
+    },
+    {
+      path: "login",
+      element: !user ? <LoginPage /> : <Navigate to="/dashboard" />,
+    },
+    {
+      path: "signup",
+      element: !user ? <SignUpPage /> : <Navigate to="/dashboard" />,
+    },
+    {
+      path: "404",
+      element: <div>Page Not found</div>,
+    },
     // {
     //     path : '*',
     //     element : <Navigate to='/404' replace/>
     // }
-]
+  ]);
 
-
-return routes
-}
-export default getRoutes;
+  return routes;
+};
+export default Routes;

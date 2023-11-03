@@ -7,16 +7,16 @@ import "./App.css";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import {useRoutes } from "react-router-dom";
-import getRoutes from "./RoutesMap";
+import Routes from "./RoutesMap";
 import { getUser } from "./localstorage/localStorage";
 
 function App() {
   const user = getUser()
-  const routes = getRoutes(user)
-  const Routes = useRoutes(routes);
+  const routes = Routes(user)
+  // const Routes = useRoutes(routes);
   return (
     <>
-      <Provider store={store}>{Routes}</Provider>
+      <Provider store={store}><Routes/></Provider>
     </>
   );
 }
