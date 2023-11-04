@@ -12,7 +12,7 @@ import { getUser } from "./localstorage/localStorage";
 
 function App() {
   const user = getUser()
-  const routes = Routes(user)
+  
   // const Routes = useRoutes(routes);
   return (
     <>

@@ -4,14 +4,16 @@ import LoginPage from "./pages/login/LoginPage";
 import SignUpPage from "./pages/signup/SignUpPage";
 import DashboardLayout from "./pages/dashboard/DashBoardLayout";
 import DashBoard from "./pages/dashboard/DashBoard";
+import FileManager from "./pages/filemanager/FileManager";
 
-const Routes = (user) => {
+const Routes = () => {
+  const user = getUser()
   const routes = useRoutes([
     {
       path: "/dashboard",
       element: user ? <DashboardLayout /> : <Navigate to="/login" />,
       children: [{ element : <DashBoard/>, index : true },
-    {path : 'file-manager' , element :<> Customers </>}
+    {path : 'file-manager' , element :<FileManager/>}
     
     ],
     },
