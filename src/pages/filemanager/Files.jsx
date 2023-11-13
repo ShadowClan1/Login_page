@@ -16,6 +16,9 @@ import Paper from "@mui/material/Paper";
 import Checkbox from "@mui/material/Checkbox";
 import IconButton from "@mui/material/IconButton";
 import Tooltip from "@mui/material/Tooltip";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -26,13 +29,16 @@ import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutli
 import DriveFileMoveIcon from "@mui/icons-material/DriveFileMove";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-
-function createData(id, name, calories, fat, carbs, protein) {
+import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
+import { useDispatch, useSelector } from "react-redux";
+import { openSmallDB } from "../../redux/DialogBoxes/smallDialogBox";
+import { createFolderReducer, deleteFileReducer } from "../../redux/file_manager/fileSlice";
+function createData(id, name, size, createdAt, carbs, protein) {
   return {
     id,
     name,
-    calories,
-    fat,
+    size,
+    createdAt,
     carbs,
     protein,
   };
@@ -178,13 +184,20 @@ LabelHead.propTypes = {
 };
 
 function EnhancedTableToolbar(props) {
+  const dispath = useDispatch()
   const { numSelected, setRows, selected, setSelected } = props;
   const [move, setMove] = React.useState({ display: false, selected: [] });
   const [copy, setCopy] = React.useState({ display: false, selected: [] });
+  const [optionsMenu, setOptionsMenu] = React.useState(null)
+  const optionsOpened = Boolean(optionsMenu);
+
+
+  const handleCloseOptions =() =>setOptionsMenu(null)
   const deleteItems = () => {
+    dispath(deleteFileReducer({list : selected}))
     console.log(selected);
     // setRows(prev=>prev.filter(e=>!selected.includes(e.id)))
-    setRows((prev) => prev.filter((e) => !selected.includes(e.id)));
+    // setRows((prev) => prev.filter((e) => !selected.includes(e.id)));
     setSelected([]);
   };
   const moveItems = () => {
@@ -208,6 +221,10 @@ function EnhancedTableToolbar(props) {
     else {
         setMove({display : false, selected : []})
     }
+  }
+  const createFolder = () => {
+    dispath(openSmallDB({title : 'Create Folder', contentText : 'Enter Folder Name Here', name : 'Folder Name', noButtonText : 'Cancel', yesButtonText : 'Create'}))
+
   }
 
   return (
@@ -290,14 +307,45 @@ function EnhancedTableToolbar(props) {
             </IconButton>
           </Tooltip>
         </>
-      ) : (
+      ) : (<>
         <Tooltip title="Filter list">
           <IconButton>
             <FilterListIcon />
           </IconButton>
         </Tooltip>
+        <Tooltip title="options" onClick={(e)=>setOptionsMenu(e.target)}>
+          <IconButton>
+            <MoreVertIcon />
+          </IconButton>
+        </Tooltip>
+        <Menu
+        id="demo-positioned-menu"
+        aria-labelledby="demo-positioned-button"
+        anchorEl={optionsMenu}
+        open={optionsOpened}
+        onClick={handleCloseOptions}
+        onClose={handleCloseOptions}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left',
+        }}
+      >
+        <MenuItem onClick={createFolder}>
+          <CreateNewFolderIcon sx={{mx : 1}}/>
+          Create Folder
+          
+          </MenuItem>
+        <MenuItem onClick={handleCloseOptions}>My account</MenuItem>
+        <MenuItem onClick={handleCloseOptions}>Logout</MenuItem>
+      </Menu>
+      </>
       )}
     </Toolbar>
+    
   );
 }
 
@@ -307,26 +355,13 @@ EnhancedTableToolbar.propTypes = {
 
 export default function Files() {
   const [order, setOrder] = React.useState("asc");
-  const [orderBy, setOrderBy] = React.useState("calories");
+  const [orderBy, setOrderBy] = React.useState("size");
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const [rows, setRows] = React.useState([
-    createData(1, "Cupcake", 305, 3.7, 67, 4.3),
-    createData(2, "Donut", 452, 25.0, 51, 4.9),
-    createData(3, "Eclair", 262, 16.0, 24, 6.0),
-    createData(4, "Frozen yoghurt", 159, 6.0, 24, 4.0),
-    createData(5, "Gingerbread", 356, 16.0, 49, 3.9),
-    //   createData(6, "Honeycomb", 408, 3.2, 87, 6.5),
-    //   createData(7, "Ice cream sandwich", 237, 9.0, 37, 4.3),
-    //   createData(8, "Jelly Bean", 375, 0.0, 94, 0.0),
-    //   createData(9, "KitKat", 518, 26.0, 65, 7.0),
-    //   createData(10, "Lollipop", 392, 0.2, 98, 0.0),
-    //   createData(11, "Marshmallow", 318, 0, 81, 2.0),
-    //   createData(12, "Nougat", 360, 19.0, 9, 37.0),
-    //   createData(13, "Oreo", 437, 18.0, 63, 4.0),
-  ]);
+  const [rowss, setRows] = React.useState([]);
+  const rows = useSelector(state=>state.fileManager.current)
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -380,7 +415,7 @@ export default function Files() {
   // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
+  console.log(rows, "these are rows")
   const visibleRows = React.useMemo(
     () =>
       stableSort(rows, getComparator(order, orderBy)).slice(
@@ -395,7 +430,7 @@ export default function Files() {
       <Paper sx={{ width: "100%", mb: 2, px: 3 }}>
         <EnhancedTableToolbar
           numSelected={selected.length}
-          setRows={setRows}
+          // setRows={setRows}
           selected={selected}
           setSelected={setSelected}
         />
@@ -445,8 +480,8 @@ export default function Files() {
                     >
                       {row.name}
                     </TableCell>
-                    <TableCell align="right">{row.calories}</TableCell>
-                    <TableCell align="right">{row.fat}</TableCell>
+                    <TableCell align="right">{row.size}</TableCell>
+                    <TableCell align="right">{row.createdAt}</TableCell>
                     <TableCell padding="checkbox">
                       <Checkbox
                         color="primary"

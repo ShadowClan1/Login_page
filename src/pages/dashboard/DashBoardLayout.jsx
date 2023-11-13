@@ -10,13 +10,21 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Badge from "@mui/material/Badge";
-import Link from "@mui/material/Link";
+// import Link from "@mui/material/Link";
 import MenuIcon from "@mui/icons-material/Menu";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import Avatar from "@mui/material/Avatar";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { mainListItems, secondaryListItems } from "./ListItems";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import AccountMenu from "../../components/AccountMenu";
+import { useDispatch, useSelector } from "react-redux";
+import {Link} from 'react-router-dom'
+import LogoutIcon from '@mui/icons-material/Logout';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import { logoutRedux } from "../../redux/userSlice/userSlice";
 
 
 
@@ -72,9 +80,23 @@ const defaultTheme = createTheme();
 
 export default function DashboardLayout() {
   const [open, setOpen] = React.useState(true);
+  const [subMenuComponent, setSubMenuComponent] = React.useState({comp :null, type : ''});
+  const user = useSelector(state=>state.user.user)
+  
+  const dispatch = useDispatch();
+  const navigate = useNavigate()
+  const openSubMenu = Boolean(subMenuComponent.comp);
   const toggleDrawer = () => {
     setOpen(!open);
   };
+  const handleOpenSubMenu = (e,type)=>{
+    setSubMenuComponent({comp :e.target, type})
+  }
+  
+  const handleCloseSubMenu = e => setSubMenuComponent({comp :null})
+  const handleLogout = () => {
+    dispatch(logoutRedux({navigate}))
+  }
 
   return (
     <ThemeProvider theme={defaultTheme}>
@@ -107,18 +129,33 @@ export default function DashboardLayout() {
             >
               Dashboard
             </Typography>
-            <IconButton color="inherit">
+            <IconButton color="inherit"  
+             >
               <Badge badgeContent={4} color="secondary">
-                <NotificationsIcon />
+                <NotificationsIcon  aria-controls={openSubMenu ? "notification-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openSubMenu ? "true" : undefined}
+             
+              onClick={(e)=>handleOpenSubMenu(e,'NOTIFICATIONS')} />
               </Badge>
             </IconButton>
-
-            <Avatar
-              alt="Remy Sharp"
-              src="/static/images/avatar/1.jpg"
+            <IconButton
+              size="small"
+              aria-controls={openSubMenu ? "account-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openSubMenu ? "true" : undefined}
               sx={{ mx: 3 }}
-            />
+              onClick={(e)=>handleOpenSubMenu(e,'ACCOUNT')}
+            >
+              <Avatar
+                alt="Remy Sharp"
+                src="/static/images/avatar/1.jpg"
+           
+              > {user?.email.substring(0,1)} </Avatar>
+            </IconButton>
           </Toolbar>
+          <AccountMenu anchorEl={subMenuComponent.comp} open={openSubMenu} handleClose={handleCloseSubMenu} type={subMenuComponent.type}/>
+    
         </AppBar>
         <Drawer variant="permanent" open={open}>
           <Toolbar
@@ -136,11 +173,19 @@ export default function DashboardLayout() {
           <Divider />
           <List component="nav">
             {mainListItems}
-            {/* <Divider sx={{ my: 1 }} />
-            {secondaryListItems} */}
+            <Divider sx={{ my: 1 }} />
+            
+            <Link className="list-link" to='/' >
+    <ListItemButton onClick={handleLogout}>
+      <ListItemIcon>
+        <LogoutIcon sx={{color : 'red'}} />
+      </ListItemIcon>
+      <ListItemText primary="Logout" />
+    </ListItemButton>
+      </Link>
           </List>
         </Drawer>
-       <Outlet/>
+        <Outlet />
       </Box>
     </ThemeProvider>
   );

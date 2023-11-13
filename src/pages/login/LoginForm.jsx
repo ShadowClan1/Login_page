@@ -13,8 +13,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
 import * as Yup from 'yup'
 import {getUser, setUser} from '../../localstorage/localStorage'
+import { useDispatch } from 'react-redux';
+import { showAlert } from '../../redux/alerts/alertSlice';
+import { loginRedux } from '../../redux/userSlice/userSlice';
 const LoginForm = () => {
   const navigate = useNavigate()
+  const dispatch = useDispatch()
 const handleSubmit = e => {
   e.preventDefault()
     form.handleSubmit()
@@ -31,10 +35,10 @@ const form = useFormik({
     password : Yup.string().required()
   }),
   onSubmit : ()=>{
-    console.log(form.values)
     setUser({...form.values, plan : false})
-    console.log(getUser())
-    navigate("/dashboard")
+   dispatch(loginRedux({navigate}))
+   
+    dispatch(showAlert({message : 'Login successfull', type : 'success' }))
 
   } 
 })
