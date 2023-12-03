@@ -16,3 +16,36 @@ code {
   text-decoration:  none;
   color: rgb(107, 106, 106);
 }
+
+
+.scrollCustom::-webkit-scrollbar {
+  width: 2px; 
+  height: 5px;
+
+}
+
+.scrollCustom::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px; 
+  width: 4px;
+  
+  height: 4px;
+}
+
+
+.scrollCustom * {
+  scrollbar-color: #888 transparent; 
+  scrollbar-width: thin; 
+}
+
+
+.scrollCustom *::-ms-scrollbar {
+  width: 2px; 
+}
+
+.scrollCustom *::-ms-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px; 
+  width: 4px;
+  height: 4px;
+}
